@@ -1,0 +1,18 @@
+|__   __/ ____|___ \                     | |               (_)     | |      
+   | | | (___   __) | _____   _____ _ __ | |_ ___  ___ _ __ _ _ __ | |_ ___ 
+   | |  \___ \ |__ < / _ \ \ / / _ \ '_ \| __/ __|/ __| '__| | '_ \| __/ __|
+   | |  ____) |___) |  __/\ V /  __/ | | | |_\__ \ (__| |  | | |_) | |_\__ \
+   |_| |_____/|____/ \___| \_/ \___|_| |_|\__|___/\___|_|  |_| .__/ \__|___/
+                                                             | |            
+                                                             |_|
+What we wan't to do
+We want to create a great eventscript system to manage multiple teamspeak3 instances as simple as possible. Everybody should be able to manage his voiceserver.
+
+It's a work in progress, what does work now?
+Currently we have integrated the base system - you can connect to multiple teamspeak instances and add plugins to them. We don't have any useful plugins for now, but feel free to create and commit some!
+
+But where is the benefit?
+Every instance has it's own thread - and every plugin, too. So you don't have any waiting time.
+
+There is no documentation :(
+This script isn't finished yet. You will need to wait some more weeks until we get all things working.
