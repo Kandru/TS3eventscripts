@@ -19,7 +19,10 @@ class ts3socket:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.ip, self.port))
         try:
-            if self.receive().startswith('TS3'):
+            msg = self.receive()
+            if msg.startswith('TS3'):
+                if 'Welcome' not in msg:
+                    self.receive()
                 self.send('use %s\n\r' % (self.sid, ))
                 if not self.receive().endswith('msg=ok\n\r'):
                     raise MyException("ServerID not found")
