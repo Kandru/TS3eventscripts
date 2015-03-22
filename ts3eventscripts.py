@@ -16,6 +16,7 @@ for key in config:
                        'user': config[key]['user'],
                        'pass': config[key]['pass'],
                        'name': config[key]['name'], })
+        ts3.daemon = True
         ts3.start()
 
 try:
