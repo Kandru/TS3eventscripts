@@ -8,6 +8,7 @@ from ts3socket import ts3socket
 from ts3tools import ts3tools
 from myexception import MyException
 from threading import Thread
+from threading import Lock
 
 # For easier usage calculate the path relative to here.
 here = os.path.abspath(os.path.dirname(__file__))
@@ -40,13 +41,16 @@ class ts3base(threading.Thread):
             # two plugin directories: global plugins in plugins/, instance only plugins in directory named with the instance name
             searchpath=[get_path('./plugins/' + self.config['id']), get_path('./plugins')], identifier=identifier)
         
+        # lock for command socket send & receive method
+        self.sendlock = Lock()
+        
         # init ts3 connection
         self.ts3_init()
         # init all plugins
         self.plugin_init()
 
     def ts3_init(self):
-        # init ts3 query socket
+        # init ts3 query socket (command socket)
         self.ts3socket = ts3socket(
             self.config['ip'],
             self.config['port'],
@@ -61,7 +65,7 @@ class ts3base(threading.Thread):
         self.debprint('loading plugins')
         for plugin_name in self.pluginsource.list_plugins():
             plugin = self.pluginsource.load_plugin(plugin_name)
-            plugin.setup(self, self.ts3socket)
+            plugin.setup(self) # for advanced usage, add a socket as passed variable
 
     def register_callback(self, plugin, key, function):
         self.callbacks[key][plugin + '_' + function.__name__] = function
@@ -73,6 +77,15 @@ class ts3base(threading.Thread):
             function.__name__ +
             ' -> (callback)' +
             key)
+
+    def send_receive(self, cmd):
+        """
+        Locks (so that other plugins must wait before doing something), sends the specified command and waits for answer message.
+        Uses the command socket only!
+        """
+        with self.sendlock:
+            self.ts3socket.send(cmd)
+            return self.ts3socket.receive()
 
     def execute_callback(self, key, values):
         if key in self.callbacks:
