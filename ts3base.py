@@ -29,6 +29,8 @@ class ts3base(threading.Thread):
         
         # init callbacks
         self.callbacks = defaultdict(dict)
+        # list of all classes (instances, objects, however)
+        self.classes = {}
         
         # identifier + package name for pluginbase
         identifier = config['id']
@@ -91,6 +93,15 @@ class ts3base(threading.Thread):
             event = self.event_socket.receive()
             self.execute_callback('ts3.receivedevent', event)
     
+    def send_receive(self, cmd):
+        """
+        Locks (so that other plugins must wait before doing something), sends the specified command and waits for answer message.
+        Uses the command socket only!
+        """
+        with self.sendlock:
+            self.ts3socket.send(cmd)
+            return self.ts3socket.receive()
+
     def register_callback(self, plugin, key, function):
         self.callbacks[key][plugin + '_' + function.__name__] = function
         # debug message
@@ -102,20 +113,37 @@ class ts3base(threading.Thread):
             ' -> (callback)' +
             key)
 
-    def send_receive(self, cmd):
-        """
-        Locks (so that other plugins must wait before doing something), sends the specified command and waits for answer message.
-        Uses the command socket only!
-        """
-        with self.sendlock:
-            self.ts3socket.send(cmd)
-            return self.ts3socket.receive()
-
     def execute_callback(self, key, values):
         if key in self.callbacks:
             for index, func in self.callbacks[key].items():
                 t = Thread(target=func, args=(values,))
                 t.start()
+
+    def get_class(self, pluginname):
+        """
+        If avaiable, returns a dictionary with name of the plugin (index is "plugin") 
+        and the function used to call the given method (index is "function").
+        """
+        if pluginname in self.classes.keys():
+            return self.classes[pluginname]
+        else:
+            return None
+
+    def get_class_list(self):
+        """
+        Returns a list (names only) with all classes registered here.
+        The names can be used to get the class with get_class()
+        """
+        return self.classes.keys()
+    
+    def register_class(self, plugin, key, function):
+        """
+        Registers a class which can be used from plugins.
+        -> classes can be used from plugins to communicate with each other
+        """
+        self.classes[key] = {}
+        self.classes[key]["function"] = function
+        self.classes[key]["plugin"] = plugin
 
     def debprint(self, msg):
         print(self.config['id'] + ' - ' + msg)
