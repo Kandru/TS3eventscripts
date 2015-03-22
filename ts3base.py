@@ -117,6 +117,7 @@ class ts3base(threading.Thread):
         if key in self.callbacks:
             for index, func in self.callbacks[key].items():
                 t = Thread(target=func, args=(values,))
+                t.daemon = True
                 t.start()
 
     def get_class(self, pluginname):
