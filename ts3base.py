@@ -58,7 +58,22 @@ class ts3base(threading.Thread):
             self.config['user'],
             self.config['pass'])
         # debug message
-        self.debprint('socket initialized')
+        self.debprint('command socket initialized')
+        
+        # init event socket for event thread
+        self.event_socket = ts3socket(
+            self.config['ip'],
+            self.config['port'],
+            self.config['sid'],
+            self.config['user'],
+            self.config['pass'])
+        # send register commands
+        self.event_socket.send('servernotifyregister event=server')
+        # init event thread
+        self.event_thread = Thread(target=self.event_process)
+        self.event_thread.daemon = True
+        self.event_thread.start()
+        self.debprint('initialized event socket in thread')
 
     def plugin_init(self):
         # debug message
@@ -66,7 +81,16 @@ class ts3base(threading.Thread):
         for plugin_name in self.pluginsource.list_plugins():
             plugin = self.pluginsource.load_plugin(plugin_name)
             plugin.setup(self) # for advanced usage, add a socket as passed variable
-
+    
+    def event_process(self):
+        """
+        The event process is called in the event thread. It's the socket receiver.
+        When received an event, execute a callback named "ts3.receivedevent" with raw event data
+        """
+        while 1:
+            event = self.event_socket.receive()
+            self.execute_callback('ts3.receivedevent', event)
+    
     def register_callback(self, plugin, key, function):
         self.callbacks[key][plugin + '_' + function.__name__] = function
         # debug message
