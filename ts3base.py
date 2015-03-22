@@ -19,21 +19,27 @@ class ts3base(threading.Thread):
     def __init__(self, config):
         # init threading
         threading.Thread.__init__(self)
+        
         # set config for whole class
         self.config = config
+        
         # debug message
         self.debprint('instance initialized')
+        
         # init callbacks
         self.callbacks = defaultdict(dict)
+        
         # identifier + package name for pluginbase
         identifier = config['id']
         package = 'ts3eventscripts' + identifier
+        
         # init pluginbase
-        self.pluginbase = PluginBase(
-            package=package, searchpath=['./plugins/' + self.config['id']])
+        self.pluginbase = PluginBase(package=package)
         # init pluginsource
         self.pluginsource = self.pluginbase.make_plugin_source(
-            searchpath=[get_path('./plugins/' + self.config['id'])], identifier=identifier)
+            # two plugin directories: global plugins in plugins/, instance only plugins in directory named with the instance name
+            searchpath=[get_path('./plugins/' + self.config['id']), get_path('./plugins')], identifier=identifier)
+        
         # init ts3 connection
         self.ts3_init()
         # init all plugins
