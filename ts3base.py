@@ -20,32 +20,32 @@ class ts3base(threading.Thread):
     def __init__(self, config):
         # init threading
         threading.Thread.__init__(self)
-        
+
         # set config for whole class
         self.config = config
-        
+
         # debug message
         self.debprint('instance initialized')
-        
+
         # init callbacks
         self.callbacks = defaultdict(dict)
         # list of all classes (instances, objects, however)
         self.classes = {}
-        
+
         # identifier + package name for pluginbase
         identifier = config['id']
         package = 'ts3eventscripts' + identifier
-        
+
         # init pluginbase
         self.pluginbase = PluginBase(package=package)
         # init pluginsource
         self.pluginsource = self.pluginbase.make_plugin_source(
             # two plugin directories: global plugins in plugins/, instance only plugins in directory named with the instance name
             searchpath=[get_path('./plugins/' + self.config['id']), get_path('./plugins')], identifier=identifier)
-        
+
         # lock for command socket send & receive method
         self.sendlock = Lock()
-        
+
         # init ts3 connection
         self.ts3_init()
         # init all plugins
@@ -61,7 +61,7 @@ class ts3base(threading.Thread):
             self.config['pass'])
         # debug message
         self.debprint('command socket initialized')
-        
+
         # init event socket for event thread
         self.event_socket = ts3socket(
             self.config['ip'],
@@ -83,7 +83,7 @@ class ts3base(threading.Thread):
         for plugin_name in self.pluginsource.list_plugins():
             plugin = self.pluginsource.load_plugin(plugin_name)
             plugin.setup(self) # for advanced usage, add a socket as passed variable
-    
+
     def event_process(self):
         """
         The event process is called in the event thread. It's the socket receiver.
@@ -92,7 +92,7 @@ class ts3base(threading.Thread):
         while 1:
             event = self.event_socket.receive()
             self.execute_callback('ts3.receivedevent', event)
-    
+
     def send_receive(self, cmd):
         """
         Locks (so that other plugins must wait before doing something), sends the specified command and waits for answer message.
@@ -122,7 +122,7 @@ class ts3base(threading.Thread):
 
     def get_class(self, pluginname):
         """
-        If avaiable, returns a dictionary with name of the plugin (index is "plugin") 
+        If avaiable, returns a dictionary with name of the plugin (index is "plugin")
         and the function used to call the given method (index is "function").
         """
         if pluginname in self.classes.keys():
@@ -136,15 +136,18 @@ class ts3base(threading.Thread):
         The names can be used to get the class with get_class()
         """
         return self.classes.keys()
-    
-    def register_class(self, plugin, key, function):
+
+    def register_class(self, key, plugin):
         """
         Registers a class which can be used from plugins.
         -> classes can be used from plugins to communicate with each other
         """
-        self.classes[key] = {}
-        self.classes[key]["function"] = function
-        self.classes[key]["plugin"] = plugin
+        self.classes[key] = plugin()
+        self.debprint(
+            'plugin ' +
+            key +
+            ' registered class ' +
+            plugin.__name__)
 
     def debprint(self, msg):
         print(self.config['id'] + ' - ' + msg)
