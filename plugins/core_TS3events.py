@@ -9,7 +9,7 @@ def setup(ts3base):
     base.register_callback(name, 'ts3.receivedevent', receivedevent)
 
 def receivedevent(data):
-    event = parse_raw_event(data)
+    event = ts3tools.parse_raw_event(data)
 
     if event["ev_type"] == 'notifycliententerview':
         event.pop("ev_type", None)
@@ -17,21 +17,6 @@ def receivedevent(data):
     elif event["ev_type"] == 'notifyclientleftview':
         event.pop("ev_type", None)
         event_clientleft(event)
-
-def parse_raw_event(msg):
-    splitted = msg.split(" ")
-
-    new = {'ev_type': splitted[0]}
-    # because in the new dict the event name already exists, we remove it from the splitted list
-    splitted.pop(0)
-    # parsing arguments
-    for arg in splitted:
-        one = arg.split('=', 1)
-        if len(one) == 2:
-            new[ts3tools.unescape_text(one[0])] = ts3tools.unescape_text(one[1])
-        else:
-            new[ts3tools.unescape_text(one[0])] = None
-    return new
 
 def event_clientjoined(user):
     global base
