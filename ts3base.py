@@ -53,7 +53,7 @@ class ts3base(threading.Thread):
 
     def ts3_init(self):
         # init ts3 query socket (command socket)
-        self.ts3socket = ts3socket(
+        self.command_socket = ts3socket(
             self.config['ip'],
             self.config['port'],
             self.config['sid'],
@@ -93,14 +93,20 @@ class ts3base(threading.Thread):
             event = self.event_socket.receive()
             self.execute_callback('ts3.receivedevent', event)
 
+    def get_event_socket(self):
+        return self.event_socket
+
+    def get_command_socket(self):
+        return self.command_socket
+
     def send_receive(self, cmd):
         """
         Locks (so that other plugins must wait before doing something), sends the specified command and waits for answer message.
         Uses the command socket only!
         """
         with self.sendlock:
-            self.ts3socket.send(cmd)
-            return self.ts3socket.receive()
+            self.command_socket.send(cmd)
+            return self.command_socket.receive()
 
     def register_callback(self, plugin, key, function):
         self.callbacks[key][plugin + '_' + function.__name__] = function
@@ -154,8 +160,16 @@ class ts3base(threading.Thread):
 
     def run(self):
         try:
+            # get clid from bot so we can identify him later
+            ts3tools.set_nickname(self.command_socket, self.config['id'])
+            # later, clientfind comes from core_TS3clients
+            answer = ts3tools.parse_raw_answer(self.send_receive('clientfind pattern=' + self.config['id']))
+            self.clid = answer['clid']
+            # debug message
+            self.debprint('The bot has the following client id: ' + self.clid)
+
             # set nickname
-            ts3tools.set_nickname(self.ts3socket, self.config['name'])
+            ts3tools.set_nickname(self.command_socket, self.config['name'])
             while 1:
                 # loop callback
                 self.execute_callback('ts3.loop', {})
