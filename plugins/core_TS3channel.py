@@ -3,7 +3,7 @@ from ts3tools import ts3tools
 name = 'core.TS3channel'
 base = None
 
-def setup(ts3base):
+def setup(ts3base, config):
     global base
     base = ts3base
     # register class to ts3eventscripts

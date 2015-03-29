@@ -17,7 +17,7 @@ event_socket = None
 config = {}
 config['command_prefix'] = '!'
 
-def setup(ts3base):
+def setup(ts3base, config):
     global base
     global command_socket
     global event_socket

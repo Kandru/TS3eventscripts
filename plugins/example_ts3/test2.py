@@ -5,7 +5,7 @@ name = 'test2'
 base = None
 
 # setup - initial plugin load
-def setup(ts3base):
+def setup(ts3base, config):
     global base
     base = ts3base
 

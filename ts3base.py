@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+import configparser
 from functools import partial
 from collections import defaultdict
 from pluginbase import PluginBase
@@ -85,7 +86,11 @@ class ts3base(threading.Thread):
         self.debprint('loading plugins')
         for plugin_name in self.pluginsource.list_plugins():
             plugin = self.pluginsource.load_plugin(plugin_name)
-            plugin.setup(self) # for advanced usage, add a socket as passed variable
+            # read config file (if file is not existing, the config is an empty dataset)
+            config = configparser.ConfigParser()
+            if config.read(['configs/' + plugin_name + '.ini']) == []:
+                config = None
+            plugin.setup(self, config) # for advanced usage, add a socket as passed variable
 
     def event_process(self):
         """

@@ -5,7 +5,7 @@ import time
 name = 'demo_1'
 
 # initial method (called from ts3eventscripts)
-def setup(ts3base):
+def setup(ts3base, config):
     # get ts3base, it's needed for nearly everything
     global base
     base = ts3base
