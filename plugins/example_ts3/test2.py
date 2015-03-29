@@ -10,11 +10,10 @@ def setup(ts3base):
     base = ts3base
 
     # register plugin function as callback
-    base.register_callback(name, 'ts3.loop', test)
+    #base.register_callback(name, 'ts3.loop', test)
 
 
 def test(values):
     global base
-    base.send_receive('sendtextmessage targetmode=2 target=1 msg=' +
-                ts3tools.escape_text('nope'))
+    base.send_receive('sendtextmessage targetmode=2 target=1 msg=' + ts3tools.escape_text('nope'))
     base.execute_callback(name + '.test', {})
