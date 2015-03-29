@@ -71,9 +71,21 @@ class ChatHelper:
         pass
 
     def send_pm(self, base, user, msg, socket=False):
+        """
+        Sends a private message to given user.
+        """
         if socket == False:
             return base.send_receive(
                'sendtextmessage targetmode=1 msg=' + msg + ' target=' + user)
         else:
             return base.get_event_socket().send(
                 'sendtextmessage targetmode=1 msg=' + msg + ' target=' + user)
+
+    def send_sm(self, base, msg, socket=False):
+        """
+        Sends a server message (all users can see it in the server tab).
+        """
+        if socket == False:
+            return base.send_receive('sendtextmessage targetmode=3 msg=' + msg)
+        else:
+            return base.get_event_socket().send('sendtextmessage targetmode=3 msg=' + msg)
