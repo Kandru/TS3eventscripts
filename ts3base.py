@@ -173,6 +173,10 @@ class ts3base(threading.Thread):
 
             # set nickname
             ts3tools.set_nickname(self, self.config['name'])
+
+            # execute start event
+            self.execute_callback('ts3.start', {})
+
             while 1:
                 # loop callback
                 self.execute_callback('ts3.loop', {})
