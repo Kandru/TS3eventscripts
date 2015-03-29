@@ -69,8 +69,11 @@ class ts3base(threading.Thread):
             self.config['sid'],
             self.config['user'],
             self.config['pass'])
-        # send register commands
+        # send register commands for events and chat messages
         self.event_socket.send('servernotifyregister event=server')
+        self.event_socket.send('servernotifyregister event=textprivate')
+        self.event_socket.send('servernotifyregister event=textchannel')
+        self.event_socket.send('servernotifyregister event=textserver')
         # init event thread
         self.event_thread = Thread(target=self.event_process)
         self.event_thread.daemon = True
