@@ -20,7 +20,7 @@ def receivedevent(data):
 
 def parse_raw_event(msg):
     splitted = msg.split(" ")
-    
+
     new = {'ev_type': splitted[0]}
     # because in the new dict the event name already exists, we remove it from the splitted list
     splitted.pop(0)
@@ -28,14 +28,14 @@ def parse_raw_event(msg):
     for arg in splitted:
         one = arg.split('=', 1)
         if len(one) == 2:
-            new[ts3tools.escape_text(one[0])] = ts3tools.escape_text(one[1])
+            new[ts3tools.unescape_text(one[0])] = ts3tools.unescape_text(one[1])
         else:
-            new[ts3tools.escape_text(one[0])] = None
+            new[ts3tools.unescape_text(one[0])] = None
     return new
 
 def event_clientjoined(user):
-   global base
-   base.execute_callback('ts3.clientjoined', user)
+    global base
+    base.execute_callback('ts3.clientjoined', user)
 
 def event_clientmove(user):
     pass
