@@ -50,5 +50,12 @@ class core_TS3channel:
         properties = ''
         for item in propertiesdict:
             properties = properties + ' ' + item + '=' + ts3tools.escape_text(str(propertiesdict[item]))
-        print('channelcreate channel_name=' + ts3tools.escape_text(name) + properties)
         return self.parse_raw_data(base.send_receive('channelcreate channel_name=' + ts3tools.escape_text(name) + properties))
+
+    # edit specific channel
+    def channeledit(self, cid, propertiesdict=[]):
+        # parse all properties
+        properties = ''
+        for item in propertiesdict:
+            properties = properties + ' ' + item + '=' + ts3tools.escape_text(str(propertiesdict[item]))
+        return self.parse_raw_data(base.send_receive('channeledit cid=' + str(cid) + ' ' + properties))
