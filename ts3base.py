@@ -153,7 +153,15 @@ class ts3base(threading.Thread):
         print(self.config['id'] + ' - ' + msg)
 
     def run(self):
+
         try:
+            # set nickname to instance id to identify itself (set some id's)
+            ts3tools.set_nickname(self.command_socket, self.config['id'])
+            answer = ts3tools.parse_raw_answer(self.send_receive('clientfind pattern=' + self.config['id']))
+            self.clid = answer['clid']
+            # debug message
+            self.debprint('The bot has the following client id: ' + self.clid)
+
             # set nickname
             ts3tools.set_nickname(self.command_socket, self.config['name'])
             while 1:
