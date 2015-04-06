@@ -1,4 +1,3 @@
-from ts3tools import ts3tools
 import time
 """
     This little plugin creates dynamically channel for our official
@@ -73,7 +72,6 @@ def channelproof():
                                 numchannel = numchannel + 1
                 # if we do not found an empty channel we need to create one :)
                 if numechannel == 0:
-                    print('no empty channel, created one')
                     # set channel properties
                     propertiesdict = {'i_channel_needed_join_power': 10, 'channel_codec_quality': 10, 'channel_flag_maxclients_unlimited': 1, 'channel_flag_permanent': 1, 'cpid': config[key]['parent']}
                     propertiesdict.update(config[key]['channel_properties'])
