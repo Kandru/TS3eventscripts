@@ -23,10 +23,6 @@ class ts3tools:
             msg = msg.replace(replace, search)
         return msg
 
-    def set_nickname(socket, nickname):
-        return socket.send(
-            'clientupdate client_nickname=' + ts3tools.escape_text(nickname))
-    
     def parse_raw_event(msg):
         splitted = msg.split(" ")
 
@@ -41,3 +37,11 @@ class ts3tools:
             else:
                 new[ts3tools.unescape_text(one[0])] = None
         return new
+
+    def set_nickname(base, nickname, socket=False):
+        if socket == False:
+            return base.send_receive(
+                'clientupdate client_nickname=' + ts3tools.escape_text(nickname))
+        else:
+            return base.get_event_socket().send(
+                'clientupdate client_nickname=' + ts3tools.escape_text(nickname))

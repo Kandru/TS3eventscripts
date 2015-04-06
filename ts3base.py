@@ -156,14 +156,14 @@ class ts3base(threading.Thread):
 
         try:
             # set nickname to instance id to identify itself (set some id's)
-            ts3tools.set_nickname(self.command_socket, self.config['id'])
+            ts3tools.set_nickname(self, self.config['id'])
             answer = ts3tools.parse_raw_answer(self.send_receive('clientfind pattern=' + self.config['id']))
             self.clid = answer['clid']
             # debug message
             self.debprint('The bot has the following client id: ' + self.clid)
 
             # set nickname
-            ts3tools.set_nickname(self.command_socket, self.config['name'])
+            ts3tools.set_nickname(self, self.config['name'])
 
             # execute start event
             self.execute_callback('ts3.start', {})
