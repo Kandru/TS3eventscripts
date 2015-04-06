@@ -1,3 +1,5 @@
+from ts3tools import ts3tools
+import json
 import time
 """
     This little plugin creates dynamically channel for our official
@@ -8,11 +10,10 @@ import time
 
 # configuration
 # configure rooms
-config = {
-    '0': {'parent': 2, 'subchan_name': 'Room #[COUNT]', 'channel_properties': {}},
-    '1': {'parent': 125, 'subchan_name': 'Room #[COUNT]', 'channel_properties': {}},
-}
-# scan interval (should not be less than 2 seconds)
+config = {}
+# config = {'0': {'parent': 2, 'subchan_name': 'Room #[COUNT]', 'channel_properties': {}}, '1': {'parent': 125, 'subchan_name': 'Room #[COUNT]', 'channel_properties': {}},}
+
+# default scan interval (should not be less than 2 seconds)
 nextInterval = 2
 
 # plugin name (must be unique!)
@@ -26,13 +27,27 @@ nextProof = 0
 
 # initial method (called from ts3eventscripts)
 def setup(ts3base):
-    global base, core_TS3channel
+    global base, core_TS3channel, config, nextInterval
     # get ts3base, it's needed for nearly everything
     base = ts3base
     # get core TS3channel
     core_TS3channel = base.get_class('core.TS3channel')
     # register callbacks
     base.register_callback(name, 'ts3.loop', loop)
+
+    # load config
+    config_file = ts3tools.get_instance_config(base, name)
+    if config_file is None:
+        config_file = ts3tools.get_global_config(name)
+    nextInterval = config_file['General']['nextInterval']
+    i = 0
+    while True:
+        room = 'Room_' + str(i)
+        if config_file.has_section(room) is True:
+            config[i] = {'parent': int(config_file[room]['parent']), 'subchan_name': config_file[room]['subchan_name'], 'channel_properties': json.loads(config_file[room]['channel_properties'])}
+        else:
+            break
+        i = i+1
 
 def loop(self):
     global channellist, core_TS3channel
