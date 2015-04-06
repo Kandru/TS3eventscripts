@@ -150,7 +150,7 @@ class ts3base(threading.Thread):
         Registers a class which can be used from plugins.
         -> classes can be used from plugins to communicate with each other
         """
-        self.classes[key] = plugin()
+        self.classes[key] = plugin(self)
         self.debprint(
             'plugin ' +
             key +

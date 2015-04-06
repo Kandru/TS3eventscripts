@@ -16,6 +16,9 @@ def setup(ts3base):
     base.register_class(name, core_TS3channel)
 
 class core_TS3channel:
+    def __init__(self, ts3base):
+        pass
+
     # to parse raw date from ts3socket
     def parse_raw_data(self, msg, multiple=True):
         channels = msg.split("error")

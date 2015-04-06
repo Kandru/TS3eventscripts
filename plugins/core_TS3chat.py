@@ -24,7 +24,7 @@ def setup(ts3base):
     command_socket = base.get_command_socket()
     event_socket = base.get_event_socket()
     config = ts3tools.get_global_config(name)
-    chathelper = ChatHelper()
+    chathelper = ChatHelper(base)
     base.register_class(name, ChatHelper)
     base.register_callback(name, 'ts3.start', event_start)
     base.register_callback(name, 'ts3.receivedevent', event_receivedevent)
@@ -67,7 +67,7 @@ def event_clientjoined(user):
         chathelper.send_pm(base, user["clid"], ts3tools.escape_text(config['Welcome']['message']), True)
 
 class ChatHelper:
-    def __init__(self):
+    def __init__(self, ts3base):
         pass
 
     def send_pm(self, base, user, msg, socket=False):
