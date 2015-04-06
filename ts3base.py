@@ -93,6 +93,12 @@ class ts3base(threading.Thread):
             event = self.event_socket.receive()
             self.execute_callback('ts3.receivedevent', event)
 
+    def get_event_socket(self):
+        return self.event_socket
+
+    def get_command_socket(self):
+        return self.command_socket
+
     def send_receive(self, cmd):
         """
         Locks (so that other plugins must wait before doing something), sends the specified command and waits for answer message.
