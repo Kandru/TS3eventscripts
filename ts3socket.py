@@ -1,8 +1,9 @@
 import socket
+import select
 from myexception import MyException
 
 # Buffer size
-BUFFER_SIZE = 1024
+BUFFER_SIZE = 8192
 
 
 class ts3socket:
@@ -42,3 +43,16 @@ class ts3socket:
 
     def receive(self):
         return self.sock.recv(BUFFER_SIZE).decode()
+
+    def recv_all(self):
+        total_data = []
+        while True:
+            read_sockets, write_sockets, error_sockets = select.select([self.sock], [], [], 0.1)
+            if read_sockets:
+                data = self.sock.recv(BUFFER_SIZE).decode()
+                if not data:
+                    break
+                total_data.append(data)
+            else:
+                break
+        return ''.join(total_data)
