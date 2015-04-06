@@ -6,7 +6,7 @@ name = 'test'
 base = None
 
 # initial method (called from ts3eventscripts)
-def setup(ts3base, config):
+def setup(ts3base):
     global base
     # get ts3base, it's needed for nearly everything
     base = ts3base

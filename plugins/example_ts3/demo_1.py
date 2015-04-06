@@ -5,14 +5,14 @@ import time
 name = 'demo_1'
 
 # initial method (called from ts3eventscripts)
-def setup(ts3base, config):
+def setup(ts3base):
     # get ts3base, it's needed for nearly everything
     global base
     base = ts3base
 
     # get chat helper
     global chathelper
-    chathelper = base.get_class('ts3.ChatHelper')
+    chathelper = base.get_class('core.TS3chat')
 
     # register plugin functions as callbacks
     

@@ -26,7 +26,7 @@ channellist = {}
 nextProof = 0
 
 # initial method (called from ts3eventscripts)
-def setup(ts3base, config):
+def setup(ts3base):
     global base, core_TS3channel
     # get ts3base, it's needed for nearly everything
     base = ts3base

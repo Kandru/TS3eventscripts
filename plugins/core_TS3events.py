@@ -3,7 +3,7 @@ from ts3tools import ts3tools
 name = 'core.TS3events'
 base = None
 
-def setup(ts3base, config):
+def setup(ts3base):
     global base
     base = ts3base
     base.register_callback(name, 'ts3.receivedevent', receivedevent)
