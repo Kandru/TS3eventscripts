@@ -63,8 +63,11 @@ def chat_cmd(event):
     base.debprint('core_TS3chat: received chat command ' + cmd['command'] + ' from ' + cmd['sender']['name'] + ' with args ' + str(cmd['args']))
 
 def event_clientjoined(user):
-    # [TODO: real welcome message]
-    chathelper.send_pm(base, user["clid"], "Welcome to the Teamspeak server! Type in a command if you want.", True)
+    # send welcome message, if enabled
+    if config['Welcome']['enabled'] == 'true':
+        if config['Welcome']['force_user'] != 'false':
+            ts3tools.set_nickname(base, config['Welcome']['force_user'] , True)
+        chathelper.send_pm(base, user["clid"], ts3tools.escape_text(config['Welcome']['message']), True)
 
 class ChatHelper:
     def __init__(self):
