@@ -18,11 +18,11 @@ def setup(ts3base):
 class core_TS3clients:
     # to parse raw date from ts3socket
     def parse_raw_data(self, msg, multiple=True):
-        channels = msg.split("error")
-        channels = channels[0].split("|")
+        clients = msg.split("error")
+        clients = clients[0].split("|")
         new = {}
-        for channel in channels:
-            splitted = channel.split(" ")
+        for client in clients:
+            splitted = client.split(" ")
             details = {}
             # parsing arguments
             for arg in splitted:
@@ -31,9 +31,9 @@ class core_TS3clients:
                     details[ts3tools.unescape_text(one[0])] = ts3tools.unescape_text(one[1])
                 else:
                     details[ts3tools.unescape_text(one[0])] = None
-            if 'cid' in details:
+            if 'clid' in details:
                 if multiple is True:
-                    new[details['cid']] = details
+                    new[details['clid']] = details
                 else:
                     return details
         return new
