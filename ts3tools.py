@@ -1,3 +1,5 @@
+import configparser
+
 # static definitions
 escapeText = [
     (' ', '\s'),
@@ -30,6 +32,18 @@ class ts3tools:
         # because in the new dict the event name already exists, we remove it from the splitted list
         splitted.pop(0)
         # parsing arguments
+        for arg in splitted:
+            one = arg.split('=', 1)
+            if len(one) == 2:
+                new[ts3tools.unescape_text(one[0])] = ts3tools.unescape_text(one[1])
+            else:
+                new[ts3tools.unescape_text(one[0])] = None
+        return new
+
+    def parse_raw_answer(msg):
+        splitted = msg.split(' ')
+
+        new = {}
         for arg in splitted:
             one = arg.split('=', 1)
             if len(one) == 2:
