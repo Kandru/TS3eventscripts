@@ -53,7 +53,7 @@ class ts3base(threading.Thread):
 
     def ts3_init(self):
         # init ts3 query socket (command socket)
-        self.ts3socket = ts3socket(
+        self.command_socket = ts3socket(
             self.config['ip'],
             self.config['port'],
             self.config['sid'],
@@ -99,8 +99,8 @@ class ts3base(threading.Thread):
         Uses the command socket only!
         """
         with self.sendlock:
-            self.ts3socket.send(cmd)
-            return self.ts3socket.receive()
+            self.command_socket.send(cmd)
+            return self.command_socket.receive()
 
     def register_callback(self, plugin, key, function):
         self.callbacks[key][plugin + '_' + function.__name__] = function
@@ -155,7 +155,7 @@ class ts3base(threading.Thread):
     def run(self):
         try:
             # set nickname
-            ts3tools.set_nickname(self.ts3socket, self.config['name'])
+            ts3tools.set_nickname(self.command_socket, self.config['name'])
             while 1:
                 # loop callback
                 self.execute_callback('ts3.loop', {})
