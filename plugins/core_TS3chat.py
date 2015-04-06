@@ -20,18 +20,19 @@ def setup(ts3base):
     global event_socket
     global chathelper
     global config
-
     base = ts3base
     command_socket = base.get_command_socket()
     event_socket = base.get_event_socket()
-
     config = ts3tools.get_global_config(name)
-
     chathelper = ChatHelper()
     base.register_class(name, ChatHelper)
-
+    base.register_callback(name, 'ts3.start', event_start)
     base.register_callback(name, 'ts3.receivedevent', event_receivedevent)
     base.register_callback(name, 'ts3.clientjoined', event_clientjoined)
+
+def event_start(event):
+    if config['Welcome']['force_user'] != 'false':
+        ts3tools.set_nickname(base, config['Welcome']['force_user'], True)
 
 def event_receivedevent(data):
     event = ts3tools.parse_raw_event(data)
@@ -50,13 +51,11 @@ def chat_msg(event):
 
 def chat_cmd(event):
     cmd = {}
-    cmd['sender'] = {   'id': event['invokerid'],
-                        'uid': event['invokeruid'],
-                        'name': event['invokername']}
+    cmd['sender'] = {'id': event['invokerid'], 'uid': event['invokeruid'], 'name': event['invokername']}
     cmd['args'] = event['msg'].split(' ')
     cmd['command'] = cmd['args'][0]
     cmd['args'].pop(0)
-    
+
     # delete first character (command_prefix)
     base.execute_callback('ts3.chat.cmd.' + cmd['command'][1:], cmd)
     # debug message
@@ -65,8 +64,6 @@ def chat_cmd(event):
 def event_clientjoined(user):
     # send welcome message, if enabled
     if config['Welcome']['enabled'] == 'true':
-        if config['Welcome']['force_user'] != 'false':
-            ts3tools.set_nickname(base, config['Welcome']['force_user'] , True)
         chathelper.send_pm(base, user["clid"], ts3tools.escape_text(config['Welcome']['message']), True)
 
 class ChatHelper:
@@ -77,18 +74,18 @@ class ChatHelper:
         """
         Sends a private message to given user.
         """
-        if socket == False:
+        if socket is False:
             return base.send_receive(
-               'sendtextmessage targetmode=1 msg=' + msg + ' target=' + user)
+               'sendtextmessage targetmode=1 msg=' + ts3tools.escape_text(msg) + ' target=' + user)
         else:
             return base.get_event_socket().send(
-                'sendtextmessage targetmode=1 msg=' + msg + ' target=' + user)
+                'sendtextmessage targetmode=1 msg=' + ts3tools.escape_text(msg) + ' target=' + user)
 
     def send_sm(self, base, msg, socket=False):
         """
         Sends a server message (all users can see it in the server tab).
         """
-        if socket == False:
+        if socket is False:
             return base.send_receive('sendtextmessage targetmode=3 msg=' + msg)
         else:
             return base.get_event_socket().send('sendtextmessage targetmode=3 msg=' + msg)
