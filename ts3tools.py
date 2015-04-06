@@ -45,3 +45,32 @@ class ts3tools:
         else:
             return base.get_event_socket().send(
                 'clientupdate client_nickname=' + ts3tools.escape_text(nickname))
+
+    ## config schema (for docs later):
+    # configs/
+    # configs/[plugin_name].ini                 -> global plugin config
+    # configs/[instance_id]/[plugin_name].ini   -> instance-only plugin config
+    def get_global_config(plugin_name):
+        """
+        Returns the global config of a plugin identified by file name. If the config isn't existing, return nothing (None).
+        Note: You can only have one config at one time, but that's not a problem. INI-Files can be categorized with sections.
+
+        @plugin_name    name of the plugin (unique plugin name)
+        """
+        config = configparser.ConfigParser()
+        if config.read('configs/' + plugin_name + '.ini') == []:
+            config = None
+        return config
+
+    def get_instance_config(base, plugin_name):
+        """
+        Returns the instance-only config of a plugin identified by file name. If the config isn't existing, return nothing (None).
+        Note: You can only have one config at one time, but that's not a problem. INI-Files can be categorized with sections.
+
+        @base           ts3base object (for finding out instance name)
+        @plugin_name    name of the plugin (unique plugin name)
+        """
+        config = configparser.ConfigParser()
+        if config.read('configs/' + base.config['id'] + '/' + plugin_name + '.ini') == []:
+            config = None
+        return config
