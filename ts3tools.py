@@ -4,7 +4,8 @@ import configparser
 escapeText = [
     (' ', '\s'),
     ('|', '\p'),
-    ('/', '\/')]
+    #('/', '\/')
+    ]
 
 unescapeText = [
     (' ', '\s'),
