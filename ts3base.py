@@ -92,7 +92,7 @@ class ts3base(threading.Thread):
         When received an event, execute a callback named "ts3.receivedevent" with raw event data
         """
         while 1:
-            event = self.event_socket.recv_all()
+            event = self.event_socket.receive()
             self.execute_callback('ts3.receivedevent', event)
 
     def get_event_socket(self):
