@@ -3,7 +3,7 @@ import configparser
 # static definitions
 escapeText = [
     (' ', '\s'),
-    ('|', '\p'),
+    ('|', '\p')
     #('/', '\/')
     ]
 
@@ -42,6 +42,7 @@ class ts3tools:
         return new
 
     def parse_raw_answer(msg):
+        msg = msg.replace('\n', ' ')
         splitted = msg.split(' ')
 
         new = {}
@@ -54,14 +55,14 @@ class ts3tools:
         return new
 
     def set_nickname(base, nickname, socket=False):
-        if socket == False:
+        if socket is False:
             return base.send_receive(
                 'clientupdate client_nickname=' + ts3tools.escape_text(nickname))
         else:
             return base.get_event_socket().send(
                 'clientupdate client_nickname=' + ts3tools.escape_text(nickname))
 
-    ## config schema (for docs later):
+    # config schema (for docs later):
     # configs/
     # configs/[plugin_name].ini                 -> global plugin config
     # configs/[instance_id]/[plugin_name].ini   -> instance-only plugin config
