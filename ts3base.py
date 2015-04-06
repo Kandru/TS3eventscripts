@@ -86,11 +86,7 @@ class ts3base(threading.Thread):
         self.debprint('loading plugins')
         for plugin_name in self.pluginsource.list_plugins():
             plugin = self.pluginsource.load_plugin(plugin_name)
-            # read config file (if file is not existing, the config is an empty dataset)
-            config = configparser.ConfigParser()
-            if config.read(['configs/' + plugin_name + '.ini']) == []:
-                config = None
-            plugin.setup(self, config) # for advanced usage, add a socket as passed variable
+            plugin.setup(self) # for advanced usage, add a socket as passed variable
 
     def event_process(self):
         """
