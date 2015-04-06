@@ -86,6 +86,6 @@ class ChatHelper:
         Sends a server message (all users can see it in the server tab).
         """
         if socket is False:
-            return base.send_receive('sendtextmessage targetmode=3 msg=' + msg)
+            return base.send_receive('sendtextmessage targetmode=3 msg=' + ts3tools.escape_text(msg))
         else:
-            return base.get_event_socket().send('sendtextmessage targetmode=3 msg=' + msg)
+            return base.get_event_socket().send('sendtextmessage targetmode=3 msg=' + ts3tools.escape_text(msg))
