@@ -1,7 +1,13 @@
 from ts3tools import ts3tools
+import time
 
 name = 'core.TS3channel'
 base = None
+
+# get a centralized channellist to avoid spamming server commands for channellists every second
+nextChannellistInterval = 2
+nextChannellist = 0
+channellist = {}
 
 def setup(ts3base):
     global base
@@ -33,8 +39,12 @@ class core_TS3channel:
         return new
 
     # get channel list
-    def channellist(self, flags=''):
-        return self.parse_raw_data(base.send_receive('channellist ' + flags))
+    def channellist(self, flags='-topic -flags -voice -limits -icon'):
+        global channellist, nextChannellist
+        if nextChannellist <= time.time():
+            channellist = self.parse_raw_data(base.send_receive('channellist ' + flags))
+            nextChannellist = time.time() + nextChannellistInterval
+        return channellist
 
     # delete specific channel
     def channeldelete(self, cid, force=1):
