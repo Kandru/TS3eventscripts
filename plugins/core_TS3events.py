@@ -21,10 +21,12 @@ def receivedevent(data):
 def event_clientjoined(user):
     global base
     base.execute_callback('ts3.clientjoined', user)
+    base.debprint('[Event] ts3.clientjoined -> Client entered the server!')
 
 def event_clientmove(user):
-    pass
+    base.debprint('[Event] ts3.clientmove -> Client entered other channel or was moved by someone!')
 
 def event_clientleft(user):
     global base
     base.execute_callback('ts3.clientleft', user)
+    base.debprint('[Event] ts3.clientleft -> Client left the server!')
