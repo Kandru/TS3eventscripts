@@ -1,4 +1,8 @@
-from ts3tools import ts3tools
+"""
+Plugin: jonni.userTracker
+Tracks users in a MySQL database defined in the core.TS3db config.
+Later there are some more tracked things like last visit, amount of time being on the server, ...
+"""
 
 name = 'jonni.userTracker'
 
@@ -20,15 +24,14 @@ def startup(bla):
     db = base.get_class('core.TS3db')
 
     db.create_table(
-        name, [['uid', 'VARCHAR(30)'], ['dbid', 'INT'], ['last_name', 'TEXT']], 'users')
+        name, [['uid', 'VARCHAR(30)'], ['dbid', 'INT'], ['clid', 'INT'], ['last_name', 'TEXT']], 'users')
 
 
 def event_clientjoined(values):
     uid = values['client_unique_identifier']
     last_name = values['client_nickname']
-    dbid_raw = base.send_receive('clientgetdbidfromuid cluid=' + uid)
-    dbid_parsed = ts3tools.parse_raw_answer(dbid_raw)
-    dbid = dbid_parsed['cldbid']
+    dbid = values['client_database_id']
+    clid = values['clid']
 
     if db.execute('SELECT * FROM `' + db.get_table_name(name, 'users') + '` WHERE `uid` = "' + uid + '";'):
         answer = db.fetch_one()
@@ -37,13 +40,17 @@ def event_clientjoined(values):
             db.fetch_one()
         else:
             answer_dbid = answer[2]
-            answer_name = answer[3]
+            answer_clid = answer[3]
+            answer_name = answer[4]
             if answer_dbid != dbid:
                 db.execute('UPDATE `' + db.get_table_name(name, 'users') + '` SET dbid = "' + dbid + '";')
                 db.fetch_one()
             if answer_name != last_name:
                 db.execute('UPDATE `' + db.get_table_name(name, 'users') + '` SET last_name = "' + last_name + '";')
                 db.fetch_one()
+            if answer_clid != clid:
+                db.execute('UPDATE `' + db.get_table_name(name, 'users') + '` SET clid = "' + clid + '";')
+    # [TODO: more details, statistics, ...]
 
 def event_clientleft():
     pass
