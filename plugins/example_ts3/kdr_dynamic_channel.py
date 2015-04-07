@@ -39,7 +39,7 @@ def setup(ts3base):
     config_file = ts3tools.get_instance_config(base, name)
     if config_file is None:
         config_file = ts3tools.get_global_config(name)
-    nextInterval = config_file['General']['nextInterval']
+    nextInterval = int(config_file['General']['nextInterval'])
     i = 0
     while True:
         room = 'Room_' + str(i)
