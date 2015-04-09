@@ -26,7 +26,6 @@ def startup(bla):
     db.create_table(
         name, [['uid', 'VARCHAR(30)'], ['dbid', 'INT'], ['clid', 'INT'], ['last_name', 'TEXT']], 'users')
 
-
 def event_clientjoined(values):
     uid = values['client_unique_identifier']
     last_name = values['client_nickname']
