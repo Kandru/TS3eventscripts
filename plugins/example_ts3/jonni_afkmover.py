@@ -139,7 +139,8 @@ def chat_afk(event):
                 string += arg + ' '
             print(string)
             afk('command', user, string)
-        afk('command', user)
+        else:
+            afk('command', user)
         # send text message for info
         if config['General']['moveback'] == 'true':
             if config['General']['name'] != 'false':
