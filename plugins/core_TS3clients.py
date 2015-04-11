@@ -19,6 +19,7 @@ class core_TS3clients:
     def __init__(self, ts3base):
         pass
 
+    # [TODO: use it from ts3tools]
     # to parse raw date from ts3socket
     def parse_raw_data(self, msg, multiple=True):
         clients = msg.split("error")
@@ -48,3 +49,22 @@ class core_TS3clients:
             clientlist = self.parse_raw_data(base.send_receive('clientlist ' + flags))
             nextClientlist = time.time() + nextClientlistInterval
         return clientlist
+
+    def clientmove(self, clid, cid):
+        clidstring = ''
+        if isinstance(clid, list):
+            i = False
+            for one in clid:
+                if i is False:
+                    clidstring += one
+                    i = True
+                else:
+                    clidstring += '|' + one
+        else:
+            clidstring = clid
+        return self.parse_raw_data(base.send_receive('clientmove clid=' + clidstring + ' cid=' + cid))
+
+    def clientinfo(self, clid):
+        query = base.send_receive('clientinfo clid=' + clid)
+        parsed = ts3tools.parse_raw_answer(query)
+        return parsed
