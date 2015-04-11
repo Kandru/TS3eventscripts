@@ -52,6 +52,8 @@ class ts3tools:
                 new[ts3tools.unescape_text(one[0])] = ts3tools.unescape_text(one[1])
             else:
                 new[ts3tools.unescape_text(one[0])] = None
+        if '' in new.keys():
+            del new['']
         return new
 
     def set_nickname(base, nickname, socket=False):
