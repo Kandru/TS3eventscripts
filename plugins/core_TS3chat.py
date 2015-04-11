@@ -13,6 +13,7 @@ base = None
 command_socket = None
 event_socket = None
 config = None
+chathelper = None
 
 def setup(ts3base):
     global base
@@ -51,7 +52,8 @@ def chat_msg(event):
 
 def chat_cmd(event):
     cmd = {}
-    cmd['sender'] = {'id': event['invokerid'], 'uid': event['invokeruid'], 'name': event['invokername']}
+    # index id for old plugins, please let it there
+    cmd['sender'] = {'id': event['invokerid'], 'clid': event['invokerid'], 'uid': event['invokeruid'], 'name': event['invokername']}
     cmd['args'] = event['msg'].split(' ')
     cmd['command'] = cmd['args'][0]
     cmd['args'].pop(0)
@@ -70,16 +72,16 @@ class ChatHelper:
     def __init__(self, ts3base):
         pass
 
-    def send_pm(self, base, user, msg, socket=False):
+    def send_pm(self, base, clid, msg, socket=False):
         """
         Sends a private message to given user.
         """
         if socket is False:
             return base.send_receive(
-               'sendtextmessage targetmode=1 msg=' + ts3tools.escape_text(msg) + ' target=' + user)
+               'sendtextmessage targetmode=1 msg=' + ts3tools.escape_text(msg) + ' target=' + clid)
         else:
             return base.get_event_socket().send(
-                'sendtextmessage targetmode=1 msg=' + ts3tools.escape_text(msg) + ' target=' + user)
+                'sendtextmessage targetmode=1 msg=' + ts3tools.escape_text(msg) + ' target=' + clid)
 
     def send_sm(self, base, msg, socket=False):
         """
