@@ -15,6 +15,8 @@ event_socket = None
 config = None
 chathelper = None
 
+command_help = {}
+
 def setup(ts3base):
     global base
     global command_socket
@@ -58,10 +60,26 @@ def chat_cmd(event):
     cmd['command'] = cmd['args'][0]
     cmd['args'].pop(0)
 
-    # delete first character (command_prefix)
-    base.execute_callback('ts3.chat.cmd.' + cmd['command'][1:], cmd)
+    if cmd['command'] != '!help':
+        # delete first character (command_prefix)
+        base.execute_callback('ts3.chat.cmd.' + cmd['command'][1:], cmd)
+    else:
+        chat_help(cmd)
     # debug message
     base.debprint('core_TS3chat: received chat command ' + cmd['command'] + ' from ' + cmd['sender']['name'] + ' with args ' + str(cmd['args']))
+
+def chat_help(event):
+    clid = event['sender']['clid']
+    if event['args'] == []:
+        count = len(command_help)
+        message = '\\n[b]Help - Command list - (' + str(count) + '):[/b]\\nType in [color=blue]!help [command][/color] for more information about a command.\\n-----------------------------------------------------------------------------------------------------------\\n \\n'
+        if count != 0:
+            for command, values in command_help.items():
+                whitespaces = 20-(2+len(event['command']))
+                message += '    [color=blue]' + event['command'] + '[/color]' + (whitespaces * ' ') + '- ' + values['title'] + '\\n'
+        else:
+            message += 'No commands here yet. :-(\\n'
+        chathelper.send_pm(base, clid, message, socket=True)
 
 def event_clientjoined(user):
     # send welcome message, if enabled
@@ -70,7 +88,10 @@ def event_clientjoined(user):
 
 class ChatHelper:
     def __init__(self, ts3base):
-        pass
+        self.base = ts3base
+
+    def add_command_help(self, command, title, desc):
+        command_help[command] = {'title': title, 'desc': desc}
 
     def send_pm(self, base, clid, msg, socket=False):
         """
