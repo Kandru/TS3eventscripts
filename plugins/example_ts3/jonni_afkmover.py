@@ -19,10 +19,9 @@ move_status = []
 def setup(ts3base):
     global base
     global config
-    global core_TS3clients
-    global core_TS3chat
 
     base = ts3base
+    base.register_callback(name, 'ts3.start', startup)
     base.register_callback(name, 'ts3.client.away', event_away)
     base.register_callback(name, 'ts3.client.notaway', event_notaway)
     base.register_callback(name, 'ts3.client.mutedmic', event_mutedmic)
@@ -35,12 +34,16 @@ def setup(ts3base):
 
     base.register_class('jonni.afkmover', AfkMover_API)
 
-    core_TS3clients = base.get_class('core.TS3clients')
-    core_TS3chat = base.get_class('core.TS3chat')
-
     config = ts3tools.get_instance_config(base, 'jonni.afkmover')
     if config is None:
         config = ts3tools.get_global_config('jonni.afkmover')
+
+def startup(values):
+    global core_TS3clients
+    global core_TS3chat
+    core_TS3clients = base.get_class('core.TS3clients')
+    core_TS3chat = base.get_class('core.TS3chat')
+    core_TS3chat.add_command_help('!afk', 'Set\'s you to AFK mode and moves you to an AFK channel.', '[TODO]')
 
 def afk(event, user, afk_message=None):
     # only do something when the user isn't afk already
@@ -56,6 +59,8 @@ def afk(event, user, afk_message=None):
             move(user, config['SpeakerMuteMove']['channel_id'])
         elif event == 'command':
             move(user, config['CommandMove']['channel_id'])
+        if config['CommandMove']['away_msg_in_desc'] == 'true' and afk_message is not None:
+            pass # [TODO]
         base.debprint('[jonni.afkMover] User ' + user['client_nickname'] + ' is now afk! He will be moved now.')
     else:
         # the user is afk, but there is a new reason for being afk now
@@ -133,7 +138,8 @@ def chat_afk(event):
         # get client info because there are no client information delivered by chat event
         user = core_TS3clients.clientinfo(event['sender']['clid'])
         user['clid'] = event['sender']['clid']
-        if len(event['args']) != 0:
+        # away message handling
+        if len(event['args']) != 0 and config['CommandMove']['away_msg'] == 'true':
             string = ''
             for arg in event['args']:
                 string += arg + ' '
