@@ -1,10 +1,12 @@
 import socket
 import select
+import time
 from myexception import MyException
 
 # Buffer size
 BUFFER_SIZE = 8192
-
+# Reconnect
+RECONNECT = False
 
 class ts3socket:
 
@@ -17,6 +19,7 @@ class ts3socket:
         self.connect()
 
     def connect(self):
+        RECONNECT = False
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.ip, self.port))
         try:
@@ -36,23 +39,45 @@ class ts3socket:
             self.disconnect()
 
     def send(self, msg):
-        return self.sock.send((msg + '\n').encode())
+        if RECONNECT == False:
+            try:
+                return self.sock.send((msg + '\n').encode())
+            except socket.error as conErr:
+                self.reconnect()
+        return False
 
     def disconnect(self):
         self.sock.close()
 
     def receive(self):
-        return self.sock.recv(BUFFER_SIZE).decode()
+        if RECONNECT == False:
+            try:
+                return self.sock.recv(BUFFER_SIZE).decode()
+            except socket.error as conErr:
+                self.reconnect()
+        return False
+
+    def reconnect(self):
+        RECONNECT = True
+        print('reconnect...')
+        self.disconnect()
+        time.sleep(5)
+        self.connect()
 
     def recv_all(self):
-        total_data = []
-        while True:
-            read_sockets, write_sockets, error_sockets = select.select([self.sock], [], [], 0.1)
-            if read_sockets:
-                data = self.sock.recv(BUFFER_SIZE).decode()
-                if not data:
-                    break
-                total_data.append(data)
-            else:
-                break
-        return ''.join(total_data)
+        if RECONNECT == False:
+            try:
+                total_data = []
+                while True:
+                    read_sockets, write_sockets, error_sockets = select.select([self.sock], [], [], 0.1)
+                    if read_sockets:
+                        data = self.sock.recv(BUFFER_SIZE).decode()
+                        if not data:
+                            break
+                        total_data.append(data)
+                    else:
+                        break
+                return ''.join(total_data)
+            except socket.error as conErr:
+                self.reconnect()
+        return False
