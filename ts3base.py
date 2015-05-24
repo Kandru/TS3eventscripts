@@ -10,6 +10,14 @@ from myexception import MyException
 from threading import Thread
 from threading import Lock
 
+""" Changelog
+-------------
+2. kandru
+- changed identifier to self.identifier
+- changed package to self.package
+1. kandru - initial commit
+"""
+
 # For easier usage calculate the path relative to here.
 here = os.path.abspath(os.path.dirname(__file__))
 get_path = partial(os.path.join, here)
@@ -33,15 +41,15 @@ class ts3base(threading.Thread):
         self.classes = {}
 
         # identifier + package name for pluginbase
-        identifier = config['id']
-        package = 'ts3eventscripts' + identifier
+        self.identifier = config['id']
+        self.package = 'ts3eventscripts' + self.identifier
 
         # init pluginbase
-        self.pluginbase = PluginBase(package=package)
+        self.pluginbase = PluginBase(package=self.package)
         # init pluginsource
         self.pluginsource = self.pluginbase.make_plugin_source(
             # two plugin directories: global plugins in plugins/, instance only plugins in directory named with the instance name
-            searchpath=[get_path('./plugins/' + self.config['id']), get_path('./plugins')], identifier=identifier)
+            searchpath=[get_path('./plugins/' + self.config['id']), get_path('./plugins')], identifier=self.identifier)
 
         # lock for command socket send & receive method
         self.sendlock = Lock()
