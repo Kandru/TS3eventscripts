@@ -1,6 +1,12 @@
 from ts3tools import ts3tools
 import pymysql
 
+""" Changelog
+-------------
+2. kandru - changed python cursor to dict cursor (to use column names instead of numbers that can change and break things easier)
+1. j0nnib0y - initial commit
+"""
+
 name = 'core.TS3db'
 
 base = None
@@ -41,7 +47,7 @@ class core_TS3db:
             self.connection = False
             return False
         if self.connection is not False:
-            self.cursor = self.connection.cursor()
+            self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
             return True
     # database schema
     # note: there are no global database tables because therefore you can use config files ;)
