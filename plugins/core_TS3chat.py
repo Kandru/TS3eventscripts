@@ -60,7 +60,7 @@ def chat_cmd(event):
     cmd['command'] = cmd['args'][0]
     cmd['args'].pop(0)
 
-    if cmd['command'] != '!help':
+    if cmd['command'] != config['General']['command_prefix'] + 'help':
         # delete first character (command_prefix)
         base.execute_callback('ts3.chat.cmd.' + cmd['command'][1:], cmd)
     else:
@@ -72,14 +72,21 @@ def chat_help(event):
     clid = event['sender']['clid']
     if event['args'] == []:
         count = len(command_help)
-        message = '\\n[b]Help - Command list - (' + str(count) + '):[/b]\\nType in [color=blue]!help [command][/color] for more information about a command.\\n-----------------------------------------------------------------------------------------------------------\\n \\n'
+        message = '\\n[b]Help - Command list - (' + str(count) + '):[/b]\\nType in [color=blue]' + config['General']['command_prefix'] + 'help [command][/color] for more information about a command.\\n-----------------------------------------------------------------------------------------------------------\\n \\n'
         if count != 0:
             for command, values in command_help.items():
-                whitespaces = 20-(2+len(event['command']))
-                message += '    [color=blue]' + event['command'] + '[/color]' + (whitespaces * ' ') + '- ' + values['title'] + '\\n'
+                whitespaces = 20-(2+len(command))
+                message += '    [color=blue]' + config['General']['command_prefix'] + command + '[/color]' + (whitespaces * ' ') + '- ' + values['title'] + '\\n'
         else:
             message += 'No commands here yet. :-(\\n'
-        chathelper.send_pm(base, clid, message, socket=True)
+    else:
+        command = ''.join(event['args'])
+        if command in command_help:
+            print(command_help[command])
+            message = '[b]' + config['General']['command_prefix'] + command + '[/b]: ' + command_help[command]['desc']
+        else:
+            message = 'Sorry, command not found :-(\\n'
+    chathelper.send_pm(base, clid, message, socket=True)
 
 def event_clientjoined(user):
     # send welcome message, if enabled
