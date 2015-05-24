@@ -82,7 +82,6 @@ def chat_help(event):
     else:
         command = ''.join(event['args'])
         if command in command_help:
-            print(command_help[command])
             message = '[b]' + config['General']['command_prefix'] + command + '[/b]: ' + command_help[command]['desc']
         else:
             message = 'Sorry, command not found :-(\\n'
