@@ -36,7 +36,6 @@ class core_TS3clients:
         if nextGrouplist <= time.time():
             grouplist = ts3tools.parse_raw_data(base.send_receive('servergrouplist'), 'sgid')
             nextGrouplist = time.time() + nextGrouplistInterval
-        print(grouplist)
         return grouplist
 
     def clientmove(self, clid, cid):
@@ -55,5 +54,15 @@ class core_TS3clients:
 
     def clientinfo(self, clid):
         query = base.send_receive('clientinfo clid=' + clid)
+        parsed = ts3tools.parse_raw_answer(query)
+        return parsed
+
+    def client_add_servergroup(self, sgid, cldbid):
+        query = base.send_receive('servergroupaddclient sgid=' + sgid + ' cldbid=' + cldbid)
+        parsed = ts3tools.parse_raw_answer(query)
+        return parsed
+
+    def client_del_servergroup(self, sgid, cldbid):
+        query = base.send_receive('servergroupdelclient sgid=' + sgid + ' cldbid=' + cldbid)
         parsed = ts3tools.parse_raw_answer(query)
         return parsed
