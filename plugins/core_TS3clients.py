@@ -8,6 +8,9 @@ base = None
 nextClientlistInterval = 2
 nextClientlist = 0
 clientlist = {}
+nextGrouplistInterval = 30
+nextGrouplist = 0
+grouplist = {}
 
 def setup(ts3base):
     global base
@@ -26,6 +29,15 @@ class core_TS3clients:
             clientlist = ts3tools.parse_raw_data(base.send_receive('clientlist ' + flags), 'clid')
             nextClientlist = time.time() + nextClientlistInterval
         return clientlist
+
+    # get list of groups
+    def grouplist(self):
+        global grouplist, nextGrouplist
+        if nextGrouplist <= time.time():
+            grouplist = ts3tools.parse_raw_data(base.send_receive('servergrouplist'), 'sgid')
+            nextGrouplist = time.time() + nextGrouplistInterval
+        print(grouplist)
+        return grouplist
 
     def clientmove(self, clid, cid):
         clidstring = ''
