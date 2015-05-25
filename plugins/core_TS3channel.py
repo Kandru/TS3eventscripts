@@ -19,33 +19,11 @@ class core_TS3channel:
     def __init__(self, ts3base):
         pass
 
-    # to parse raw date from ts3socket
-    def parse_raw_data(self, msg, multiple=True):
-        channels = msg.split("error")
-        channels = channels[0].split("|")
-        new = {}
-        for channel in channels:
-            splitted = channel.split(" ")
-            details = {}
-            # parsing arguments
-            for arg in splitted:
-                one = arg.split('=', 1)
-                if len(one) == 2:
-                    details[ts3tools.unescape_text(one[0])] = ts3tools.unescape_text(one[1])
-                else:
-                    details[ts3tools.unescape_text(one[0])] = None
-            if 'cid' in details:
-                if multiple is True:
-                    new[details['cid']] = details
-                else:
-                    return details
-        return new
-
     # get channel list
     def channellist(self, flags='-topic -flags -voice -limits -icon'):
         global channellist, nextChannellist
         if nextChannellist <= time.time():
-            channellist = self.parse_raw_data(base.send_receive('channellist ' + flags))
+            channellist = ts3tools.parse_raw_data(base.send_receive('channellist ' + flags), 'cid')
             nextChannellist = time.time() + nextChannellistInterval
         return channellist
 
@@ -63,7 +41,7 @@ class core_TS3channel:
         properties = ''
         for item in propertiesdict:
             properties = properties + ' ' + item + '=' + ts3tools.escape_text(str(propertiesdict[item]))
-        return self.parse_raw_data(base.send_receive('channelcreate channel_name=' + ts3tools.escape_text(name) + properties))
+        return ts3tools.parse_raw_data(base.send_receive('channelcreate channel_name=' + ts3tools.escape_text(name) + properties))
 
     # edit specific channel
     def channeledit(self, cid, propertiesdict=[]):
@@ -71,4 +49,4 @@ class core_TS3channel:
         properties = ''
         for item in propertiesdict:
             properties = properties + ' ' + item + '=' + ts3tools.escape_text(str(propertiesdict[item]))
-        return self.parse_raw_data(base.send_receive('channeledit cid=' + str(cid) + ' ' + properties))
+        return ts3tools.parse_raw_data(base.send_receive('channeledit cid=' + str(cid) + ' ' + properties))

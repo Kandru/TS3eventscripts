@@ -56,6 +56,27 @@ class ts3tools:
             del new['']
         return new
 
+    def parse_raw_data(msg, dtype='clid', multiple=True):
+        data = msg.split("error")
+        data = data[0].split("|")
+        new = {}
+        for item in data:
+            splitted = item.split(" ")
+            details = {}
+            # parsing arguments
+            for arg in splitted:
+                one = arg.split('=', 1)
+                if len(one) == 2:
+                    details[ts3tools.unescape_text(one[0])] = ts3tools.unescape_text(one[1])
+                else:
+                    details[ts3tools.unescape_text(one[0])] = None
+            if dtype in details:
+                if multiple is True:
+                    new[details[dtype]] = details
+                else:
+                    return details
+        return new
+
     def set_nickname(base, nickname, socket=False):
         if socket is False:
             return base.send_receive(
