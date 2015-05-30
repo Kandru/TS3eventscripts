@@ -1,8 +1,9 @@
 from ts3tools import ts3tools
-import pymysql
+import MySQLdb as mdb
 
 """ Changelog
 -------------
+3. kandru - changed pymysql to mysqlclient
 2. kandru - changed python cursor to dict cursor (to use column names instead of numbers that can change and break things easier)
 1. j0nnib0y - initial commit
 """
@@ -40,14 +41,17 @@ class core_TS3db:
         Do not use it because it's called at database core init automatically!
         """
         try:
-            self.connection = pymysql.connect(self.config['MySQL']['host'], self.config[
+            mdb.threadsafety = 3
+            self.connection = mdb.connect(self.config['MySQL']['host'], self.config[
                                               'MySQL']['user'], self.config['MySQL']['pass'], self.config['MySQL']['db'])
-        except pymysql.Error as e:
+        except mdb.Error as e:
             self.base.debprint("[MySQL] Error %d: %s" % (e.args[0], e.args[1]))
             self.connection = False
             return False
         if self.connection is not False:
-            self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+            self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
+            self.cursor.execute('SELECT VERSION()')
+            self.base.debprint('[MySQL] Version: %s' % (self.fetch_one()['VERSION()']))
             return True
     # database schema
     # note: there are no global database tables because therefore you can use config files ;)
@@ -81,7 +85,7 @@ class core_TS3db:
             try:
                 self.cursor.execute('CREATE TABLE IF NOT EXISTS `' + self.get_table_name(plugin_name, table_name) + '`' + columnstring + ';')
                 return True
-            except pymysql.Error as e:
+            except mdb.Error as e:
                 self.base.debprint(
                     '[MySQL] Error %d: %s' % (e.args[0], e.args[1]))
                 return False
@@ -89,7 +93,7 @@ class core_TS3db:
             try:
                 self.cursor.execute('CREATE TABLE IF NOT EXISTS `' + self.get_table_name(plugin_name) + '`' + columnstring + ';')
                 return True
-            except pymysql.Error as e:
+            except mdb.Error as e:
                 self.base.debprint(
                     '[MySQL] Error %d: %s' % (e.args[0], e.args[1]))
                 return False
@@ -103,13 +107,19 @@ class core_TS3db:
             self.cursor.execute(command)
             self.connection.commit()
             return True
-        except pymysql.Error as e:
+        except mdb.Error as e:
             self.base.debprint('[MySQL] Error: %d: %s' %
                                (e.args[0], e.args[1]))
             return False
 
     def fetch_one(self):
-        return self.cursor.fetchone()
+        tmp = self.cursor.fetchone()
+        self.cursor.close()
+        self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
+        return tmp
 
     def fetch_all(self):
-        return self.cursor.fetchall()
+        tmp = self.cursor.fetchall()
+        self.cursor.close()
+        self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
+        return tmp
