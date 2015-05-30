@@ -57,7 +57,7 @@ class ts3tools:
         return new
 
     def parse_raw_data(msg, dtype='clid', multiple=True):
-        data = msg.split("error")
+        data = msg.split("error id=0 msg=ok")
         data = data[0].split("|")
         new = {}
         for item in data:
