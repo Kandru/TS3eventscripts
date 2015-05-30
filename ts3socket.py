@@ -39,7 +39,7 @@ class ts3socket:
             self.disconnect()
 
     def send(self, msg):
-        if RECONNECT == False:
+        if RECONNECT is False:
             try:
                 return self.sock.send((msg + '\n').encode())
             except socket.error as conErr:
@@ -50,7 +50,7 @@ class ts3socket:
         self.sock.close()
 
     def receive(self):
-        if RECONNECT == False:
+        if RECONNECT is False:
             try:
                 return self.sock.recv(BUFFER_SIZE).decode()
             except socket.error as conErr:
@@ -65,7 +65,7 @@ class ts3socket:
         self.connect()
 
     def recv_all(self):
-        if RECONNECT == False:
+        if RECONNECT is False:
             try:
                 total_data = []
                 while True:
