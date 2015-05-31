@@ -48,8 +48,7 @@ class core_TS3db:
         """
         try:
             mdb.threadsafety = 1
-            self.connection = mdb.connect(self.config['MySQL']['host'], self.config[
-                                              'MySQL']['user'], self.config['MySQL']['pass'], self.config['MySQL']['db'])
+            self.connection = mdb.connect(self.config['MySQL']['host'], self.config['MySQL']['user'], self.config['MySQL']['pass'], self.config['MySQL']['db'], charset='utf8')
         except mdb.Error as e:
             self.base.debprint("[MySQL] Error %d: %s" % (e.args[0], e.args[1]))
             self.connection = False
