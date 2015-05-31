@@ -53,18 +53,17 @@ def event_clientjoined(values):
     timestamp = str(time.time())
     row = db.query('SELECT * FROM `' + db.get_table_name(name, 'users') + '` WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', 'one')
     if row:
-        if row is None:
-            create_client(values)
-        else:
-            # set lastonline timestamp to now
-            db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET ts_lastonline = "' + timestamp + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
-            # if something has changed since last connect
-            if row['dbid'] != dbid:
-                db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET dbid = "' + dbid + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
-            if row['last_name'] != last_name:
-                db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET last_name = "' + last_name + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
-            if row['clid'] != clid:
-                db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET clid = "' + clid + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
+        # set lastonline timestamp to now
+        db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET ts_lastonline = "' + timestamp + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
+        # if something has changed since last connect
+        if row['dbid'] != dbid:
+            db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET dbid = "' + dbid + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
+        if row['last_name'] != last_name:
+            db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET last_name = "' + last_name + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
+        if row['clid'] != clid:
+            db.query('UPDATE `' + db.get_table_name(name, 'users') + '` SET clid = "' + clid + '", ts_lastchange = "' + timestamp + '" WHERE `uid` = "' + uid + '" AND `instance` = "' + base.identifier + '";', wait=False)
+    else:
+        create_client(values)
     # [TODO: more details, statistics, ...]
 
 def event_clientleft(values):
