@@ -1,8 +1,10 @@
 from ts3tools import ts3tools
 import MySQLdb as mdb
+import time
 
 """ Changelog
 -------------
+4. kandru - added queue to prevend query errors - TODO: automatically reconnect on network failure
 3. kandru - changed pymysql to mysqlclient
 2. kandru - changed python cursor to dict cursor (to use column names instead of numbers that can change and break things easier)
 1. j0nnib0y - initial commit
@@ -12,12 +14,16 @@ name = 'core.TS3db'
 
 base = None
 config = None
+queue = {}
+result_queue = {}
 
 
 def setup(ts3base):
     global base
     base = ts3base
     base.register_class(name, core_TS3db)
+    db = base.get_class('core.TS3db')
+    base.register_callback(name, 'ts3.loop', db.queue_worker)
 
 
 class core_TS3db:
@@ -41,7 +47,7 @@ class core_TS3db:
         Do not use it because it's called at database core init automatically!
         """
         try:
-            mdb.threadsafety = 3
+            mdb.threadsafety = 1
             self.connection = mdb.connect(self.config['MySQL']['host'], self.config[
                                               'MySQL']['user'], self.config['MySQL']['pass'], self.config['MySQL']['db'])
         except mdb.Error as e:
@@ -49,9 +55,6 @@ class core_TS3db:
             self.connection = False
             return False
         if self.connection is not False:
-            self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
-            self.cursor.execute('SELECT VERSION()')
-            self.base.debprint('[MySQL] Version: %s' % (self.fetch_one()['VERSION()']))
             return True
     # database schema
     # note: there are no global database tables because therefore you can use config files ;)
@@ -83,7 +86,7 @@ class core_TS3db:
         columnstring += ')'
         if table_name is not None:
             try:
-                self.cursor.execute('CREATE TABLE IF NOT EXISTS `' + self.get_table_name(plugin_name, table_name) + '`' + columnstring + ';')
+                self.query('CREATE TABLE IF NOT EXISTS `' + self.get_table_name(plugin_name, table_name) + '`' + columnstring + ';', wait=False)
                 return True
             except mdb.Error as e:
                 self.base.debprint(
@@ -91,35 +94,64 @@ class core_TS3db:
                 return False
         else:
             try:
-                self.cursor.execute('CREATE TABLE IF NOT EXISTS `' + self.get_table_name(plugin_name) + '`' + columnstring + ';')
+                self.query('CREATE TABLE IF NOT EXISTS `' + self.get_table_name(plugin_name) + '`' + columnstring + ';', wait=False)
                 return True
             except mdb.Error as e:
                 self.base.debprint(
                     '[MySQL] Error %d: %s' % (e.args[0], e.args[1]))
                 return False
 
-    def execute(self, command):
+    def execute(self, command, type='all'):
         """
         Manually executes commands.
-        Note: If you don't know how to do, please use the pre-formatted command methods!
+        Note: If you don't know how to do, please use the pre-formatted query method!
         """
         try:
+            self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
             self.cursor.execute(command)
             self.connection.commit()
-            return True
+            if type is 'all':
+                tmp = self.cursor.fetchall()
+            else:
+                tmp = self.cursor.fetchone()
+            self.cursor.close()
+            return tmp
         except mdb.Error as e:
             self.base.debprint('[MySQL] Error: %d: %s' %
                                (e.args[0], e.args[1]))
+            self.cursor.close()
             return False
 
-    def fetch_one(self):
-        tmp = self.cursor.fetchone()
-        self.cursor.close()
-        self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
-        return tmp
+    def query(self, command, type='all', wait=True):
+        """
+        Adds a query to the queue and waits until its finished.
+        Optional you do not need to wait until the query is finished
+        """
+        global queue, result_queue
+        tmp_queue = queue
+        qid = time.time()
+        while qid in tmp_queue:
+            qid = time.time()
+        tmp_queue[qid] = {'sql': command, 'type': type, 'wait': wait}
+        if wait is True:
+            while qid not in result_queue:
+                pass
+            tmp = result_queue[qid]
+            del result_queue[qid]
+            return tmp
+        else:
+            return True
 
-    def fetch_all(self):
-        tmp = self.cursor.fetchall()
-        self.cursor.close()
-        self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
-        return tmp
+    def queue_worker(self, event):
+        """
+        execute all queued events
+        """
+        global queue, rqueue
+        qids = queue.copy()
+        for qid in qids:
+            tmp = self.execute(queue[qid]['sql'], queue[qid]['type'])
+            if queue[qid]['wait'] is True:
+                result_queue[qid] = tmp
+            del queue[qid]
+        if len(qids.keys()) > 0:
+            self.base.debprint('[MySQL] Info: %s queries finished' % len(qids.keys()))
