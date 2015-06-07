@@ -10,14 +10,6 @@ from myexception import MyException
 from threading import Thread
 from threading import Lock
 
-""" Changelog
--------------
-2. kandru
-- changed identifier to self.identifier
-- changed package to self.package
-1. kandru - initial commit
-"""
-
 # For easier usage calculate the path relative to here.
 here = os.path.abspath(os.path.dirname(__file__))
 get_path = partial(os.path.join, here)
@@ -26,45 +18,44 @@ get_path = partial(os.path.join, here)
 class ts3base(threading.Thread):
 
     def __init__(self, config):
+        """
+        Creates a new instance of ts3base and initializes all neccessary parameters
+        """
         # init threading
         threading.Thread.__init__(self)
-
         # set config for whole class
         self.config = config
-
         # debug message
         self.debprint('instance initialized')
-
         # init callbacks
         self.callbacks = defaultdict(dict)
         # list of all classes (instances, objects, however)
         self.classes = {}
-
         # identifier + package name for pluginbase
         self.identifier = config['id']
         self.package = 'ts3eventscripts' + self.identifier
-
         # init pluginbase
         self.pluginbase = PluginBase(package=self.package)
-        # init pluginsource
-        self.pluginsource = self.pluginbase.make_plugin_source(
-            # two plugin directories: global plugins in plugins/, instance only plugins in directory named with the instance name
-            searchpath=[get_path('./plugins/' + self.config['id']), get_path('./plugins')], identifier=self.identifier)
-
         # lock for command socket send & receive method
         self.sendlock = Lock()
-
         # init ts3 connection
         self.ts3_init()
+        # load user plugins
+        self.plugin_load()
+        for plugin in self.pluginsource.list_plugins():
+            self.debprint(plugin)
         # init all plugins
         self.plugin_init()
 
     def ts3_init(self):
+        """
+        Initialization of the ts3eventscript sockets for teamspeak3
+        """
         # init ts3 query socket (command socket)
         self.command_socket = ts3socket(
             self.config['ip'],
-            self.config['port'],
-            self.config['sid'],
+            int(self.config['port']),
+            int(self.config['sid']),
             self.config['user'],
             self.config['pass'])
         # debug message
@@ -73,8 +64,8 @@ class ts3base(threading.Thread):
         # init event socket for event thread
         self.event_socket = ts3socket(
             self.config['ip'],
-            self.config['port'],
-            self.config['sid'],
+            int(self.config['port']),
+            int(self.config['sid']),
             self.config['user'],
             self.config['pass'])
         # send register commands
@@ -87,12 +78,34 @@ class ts3base(threading.Thread):
         self.event_thread.start()
         self.debprint('initialized event socket in thread')
 
+    def plugin_load(self):
+        """
+        Load plugins specified from a user
+        """
+        paths = []
+        for path in os.listdir(get_path('./plugins/')):
+            paths.append('./plugins/' + path)
+        self.pluginsource = self.pluginbase.make_plugin_source(
+            # core plugins are loaded for any instance. Other plugins are handled later on
+            searchpath=paths, identifier=self.identifier)
+
     def plugin_init(self):
-        # debug message
+        """
+        Init plugins for this instance
+        """
         self.debprint('loading plugins')
+        plugins = self.config['plugins'].split(',')
+        # load core plugins first
         for plugin_name in self.pluginsource.list_plugins():
-            plugin = self.pluginsource.load_plugin(plugin_name)
-            plugin.setup(self) # for advanced usage, add a socket as passed variable
+            author = plugin_name.split('_', 1)[0]
+            if author == 'core':
+                plugin = self.pluginsource.load_plugin(plugin_name)
+                plugin.setup(self) # pass ts3base instance to plugin
+        # load user plugins next
+        for plugin_name in self.pluginsource.list_plugins():
+            if plugin_name in plugins:
+                plugin = self.pluginsource.load_plugin(plugin_name)
+                plugin.setup(self) # pass ts3base instance to plugin
 
     def event_process(self):
         """
@@ -104,9 +117,15 @@ class ts3base(threading.Thread):
             self.execute_callback('ts3.receivedevent', event)
 
     def get_event_socket(self):
+        """
+        Get the event socket
+        """
         return self.event_socket
 
     def get_command_socket(self):
+        """
+        Get the command socket
+        """
         return self.command_socket
 
     def send_receive(self, cmd):
@@ -119,6 +138,9 @@ class ts3base(threading.Thread):
             return self.command_socket.recv_all()
 
     def register_callback(self, plugin, key, function):
+        """
+        Register a new callback
+        """
         self.callbacks[key][plugin + '_' + function.__name__] = function
         # debug message
         self.debprint(
@@ -130,6 +152,9 @@ class ts3base(threading.Thread):
             key)
 
     def execute_callback(self, key, values):
+        """
+        Execute all plugin callbacks from a specific type in a separate thread
+        """
         if key in self.callbacks:
             for index, func in self.callbacks[key].items():
                 t = Thread(target=func, args=(values,))
@@ -166,10 +191,15 @@ class ts3base(threading.Thread):
             plugin.__name__)
 
     def debprint(self, msg):
+        """
+        Prints a debug message to the console
+        """
         print(self.config['id'] + ' - ' + msg)
 
     def run(self):
-
+        """
+        Main class to keep ts3base.py running forever
+        """
         try:
             # set nickname to instance id to identify itself (set some id's)
             ts3tools.set_nickname(self, self.config['id'])
