@@ -2,22 +2,23 @@
 import time
 import configparser
 from ts3base import ts3base
+from ts3http import ts3http
+from threading import Thread
 from myexception import MyException
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+# start ts3 instances
 for key in config:
     if key.startswith('instance'):
-        ts3 = ts3base({'id': config[key]['id'],
-                       'ip': config[key]['ip'],
-                       'port': int(config[key]['port']),
-                       'sid': int(config[key]['sid']),
-                       'user': config[key]['user'],
-                       'pass': config[key]['pass'],
-                       'name': config[key]['name'], })
+        ts3 = ts3base(config[key])
         ts3.daemon = True
         ts3.start()
+# start webinterface
+t = Thread(target=ts3http, args=())
+t.daemon = True
+t.start()
 
 try:
     while 1:
