@@ -5,14 +5,14 @@
    |_| |_____/|____/ \___| \_/ \___|_| |_|\__|___/\___|_|  |_| .__/ \__|___/
                                                              | |            
                                                              |_|
-What we wan't to do
-We want to create a great eventscript system to manage multiple teamspeak3 instances as simple as possible. Everybody should be able to manage his voiceserver.
+**What TS3eventscripts is**
+TS3eventscripts is an python3 teamspeak bot that can handle multiple instances (multiple ts3 servers) at once. Every instance could be configured individually to fit your needs. We provide you the ability to manage your teamspeak completely automatically. You should be interessted in the language python to create own plugins.
 
-It's a work in progress, what does work now?
-Currently we have integrated the base system - you can connect to multiple teamspeak instances and add plugins to them. We don't have any useful plugins for now, but feel free to create and commit some!
+**What's already included?**
+The basic communication system is already finished. We provide you a few basic plugins for managing your teamspeak server. We also have started the work on an webinterface to manage your instances completely without the knowledge of configuration files or python. It will still need some time to give you the first impressions of the new webinterface, but the work is going on!
 
-But where is the benefit?
-Every instance has it's own thread - and every plugin, too. So you don't have any waiting time.
+**But where is the benefit?**
+Our TS3eventscripts system is a multi threading application. That means that every communication from an ts3 server instance is handled in real time without an significant waiting time. Even for big public teamspeaks with more then 500 active users. Create your own plugins for TS3eventscripts to fit your needs. All is possible: automatically register new players after some time, move afk players to a specific channel and back, kick or ban players that record and do not have the permission to do that. You have the complete control over your teamspeak server if you want to.
 
-There is no documentation :(
-This script isn't finished yet. You will need to wait some more weeks until we get all things working.
+**There is no documentation :(**
+This script isn't finished yet. You will need to wait some more weeks until we get all things working and have time for a complete documentation. If you know python you could have a look at the source code. Hopefully it's well documented. Otherwise ask us a question, we are pleased to help you with your problems. Also have a look at our github wiki (menu on the right) to have some idea how to manage the installation of TS3eventscripts.
