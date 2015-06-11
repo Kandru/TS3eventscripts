@@ -8,15 +8,17 @@ from myexception import MyException
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+instances = {}
 
 # start ts3 instances
 for key in config:
-    if key.startswith('instance'):
-        ts3 = ts3base(config[key])
-        ts3.daemon = True
-        ts3.start()
+    if key != 'DEFAULT':
+        config[key]['id'] = key
+        instances[key] = ts3base(config[key])
+        instances[key].daemon = True
+        instances[key].start()
 # start webinterface
-t = Thread(target=ts3http, args=())
+t = Thread(target=ts3http, args=(instances))
 t.daemon = True
 t.start()
 
