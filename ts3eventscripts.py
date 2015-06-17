@@ -18,7 +18,7 @@ for key in config:
         instances[key].daemon = True
         instances[key].start()
 # start webinterface
-t = Thread(target=ts3http, args=(instances))
+t = Thread(target=ts3http, kwargs={'inst':instances})
 t.daemon = True
 t.start()
 
