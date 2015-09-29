@@ -17,7 +17,6 @@ config = None
 queue = {}
 result_queue = {}
 
-
 def setup(ts3base):
     global base
     base = ts3base
@@ -105,20 +104,25 @@ class core_TS3db:
         Manually executes commands.
         Note: If you don't know how to do, please use the pre-formatted query method!
         """
-        try:
-            self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
-            self.cursor.execute(command)
-            self.connection.commit()
-            if type is 'all':
-                tmp = self.cursor.fetchall()
-            else:
-                tmp = self.cursor.fetchone()
-            self.cursor.close()
-            return tmp
-        except mdb.Error as e:
-            self.base.debprint('[MySQL] Error: %d: %s' %
-                               (e.args[0], e.args[1]))
-            self.cursor.close()
+        if self.connection is not False:
+            try:
+                self.cursor = self.connection.cursor(mdb.cursors.DictCursor)
+                self.cursor.execute(command)
+                self.connection.commit()
+                if type is 'all':
+                    tmp = self.cursor.fetchall()
+                else:
+                    tmp = self.cursor.fetchone()
+                self.cursor.close()
+                return tmp
+            except mdb.Error as e:
+                self.base.debprint('[MySQL] Error: %d: %s' %
+                                   (e.args[0], e.args[1]))
+                self.cursor.close()
+                self.connect()
+                return False
+        else:
+            self.connect()
             return False
 
     def query(self, command, type='all', wait=True):
@@ -149,8 +153,8 @@ class core_TS3db:
         qids = queue.copy()
         for qid in qids:
             tmp = self.execute(queue[qid]['sql'], queue[qid]['type'])
-            if queue[qid]['wait'] is True:
-                result_queue[qid] = tmp
-            del queue[qid]
-        if len(qids.keys()) > 0:
-            self.base.debprint('[MySQL] Info: %s queries finished' % len(qids.keys()))
+            if tmp is not False:
+                if queue[qid]['wait'] is True:
+                    result_queue[qid] = tmp
+                del queue[qid]
+                self.base.debprint('[MySQL] Info: query number %s finished' % qid)
